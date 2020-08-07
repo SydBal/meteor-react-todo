@@ -15,11 +15,15 @@ export const App = () => {
   }
 
   // use  { sort: { createdAt: -1 } } to get newest entries first
-  const { tasks, incompleteTasksCount, user } = useTracker(() => ({
-    tasks: Tasks.find(filter, { sort: { createdAt: -1 } }).fetch(),
-    incompleteTasksCount: Tasks.find(notCheckedQuery).count(),
-    user: Meteor.user()
-  }));
+  const { tasks, incompleteTasksCount, user } = useTracker(() => {
+    Meteor.subscribe('tasks');
+ 
+    return ({
+      tasks: Tasks.find(filter, {sort: {createdAt: -1}}).fetch(),
+      incompleteTasksCount: Tasks.find(notCheckedQuery).count(),
+      user: Meteor.user(),
+    });
+  });
 
   const toggleChecked = ({ _id, isChecked }) =>
     Meteor.call('tasks.setChecked', {
@@ -32,6 +36,10 @@ export const App = () => {
         // Success!
       }
     });
+
+  const togglePrivate = ({ _id, isPrivate }) => {
+    Meteor.call('tasks.setPrivate', _id, !isPrivate);
+  };
 
   const deleteTask = ({ _id }) =>
     Meteor.call('tasks.remove', _id, (err, res) => {
@@ -69,6 +77,7 @@ export const App = () => {
           key={ task._id }
           task={ task }
           onCheckboxClick={toggleChecked}
+          onTogglePrivateClick={togglePrivate}
           onDeleteClick={deleteTask}
         />)}
       </ul>
