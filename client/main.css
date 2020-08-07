@@ -11,10 +11,15 @@ input[type=checkbox]:checked + span {
   text-decoration: line-through;
 }
 
-simple-todos-react {
+.simple-todos-react {
   margin: 0 auto;
   max-width: 512px;
 }
+
+.simple-todos-react .filters {
+  margin-bottom: 1rem;
+}
+
 
 .simple-todos-react .tasks {
   padding: 0;
