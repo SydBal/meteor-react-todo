@@ -6,3 +6,7 @@ body {
 .task-form {
   margin-top: 1rem;
 }
+
+input[type=checkbox]:checked + span {
+  text-decoration: line-through;
+}
