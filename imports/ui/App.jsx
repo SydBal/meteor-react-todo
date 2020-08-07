@@ -5,7 +5,8 @@ import { TaskForm } from './TaskForm';
 import Tasks from '/imports/api/tasks';
 
 export const App = () => {
-  const tasks = useTracker(() => Tasks.find({}).fetch());
+  // use  { sort: { createdAt: -1 } } to get newest entries first
+  const tasks = useTracker(() => Tasks.find({}, { sort: { createdAt: -1 } }).fetch());
 
   return (
     <>
