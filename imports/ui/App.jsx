@@ -2,7 +2,8 @@ import React, { useState } from 'react';
 import { useTracker } from 'meteor/react-meteor-data';
 import { Task } from './Task';
 import { TaskForm } from './TaskForm';
-import Tasks from '/imports/api/tasks';
+import { LoginForm } from './LoginForm';
+import { Tasks } from '/imports/api/tasks';
 
 export const App = () => {
   const [hideCompleted, setHideCompleted] = useState(false);
@@ -14,20 +15,40 @@ export const App = () => {
   }
 
   // use  { sort: { createdAt: -1 } } to get newest entries first
-  const { tasks, incompleteTasksCount } = useTracker(() => ({
+  const { tasks, incompleteTasksCount, user } = useTracker(() => ({
     tasks: Tasks.find(filter, { sort: { createdAt: -1 } }).fetch(),
-    incompleteTasksCount: Tasks.find(notCheckedQuery).count()
+    incompleteTasksCount: Tasks.find(notCheckedQuery).count(),
+    user: Meteor.user()
   }));
 
-  const toggleChecked = ({ _id, isChecked }) => {
-    Tasks.update(_id, {
-      $set: {
-        isChecked: !isChecked
+  const toggleChecked = ({ _id, isChecked }) =>
+    Meteor.call('tasks.setChecked', {
+      taskId: _id,
+      isChecked: !isChecked
+    }, (err, res) => {
+      if (err) {
+        alert(err);
+      } else {
+        // Success!
       }
-    })
-  };
+    });
 
-  const deleteTask = ({ _id }) => Tasks.remove(_id);
+  const deleteTask = ({ _id }) =>
+    Meteor.call('tasks.remove', _id, (err, res) => {
+      if (err) {
+        alert(err);
+      } else {
+        // Success!
+      }
+    });
+
+  if (!user) {
+    return (
+      <div className="simple-todos-react">
+        <LoginForm/>
+      </div>
+    );
+  }
 
   return (
     <div className="simple-todos-react">
@@ -44,12 +65,12 @@ export const App = () => {
         </label>
       </div>
       <ul className="tasks">
-        { tasks.map(task => <Task
+        {tasks.map(task => <Task
           key={ task._id }
           task={ task }
           onCheckboxClick={toggleChecked}
           onDeleteClick={deleteTask}
-        />) }
+        />)}
       </ul>
       <TaskForm />
     </div>

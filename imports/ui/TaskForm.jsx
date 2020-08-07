@@ -1,19 +1,20 @@
 import React, { useState } from 'react';
 import Tasks from '/imports/api/tasks';
 
-export const TaskForm = () => {
+export const TaskForm = ({ user }) => {
   const [text, setText] = useState("");
 
   const handleSubmit = event => {
     event.preventDefault()
     if (!text) return;
 
-    Tasks.insert({
-      text: text.trim(),
-      createdAt: new Date()
+    Meteor.call('tasks.insert', text.trim(), (err, res) => {
+      if (err) {
+        alert(err);
+      } else {
+        setText("");
+      }
     });
-
-    setText("");
   };
 
   return (
