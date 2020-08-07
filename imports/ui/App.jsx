@@ -7,17 +7,17 @@ import Tasks from '/imports/api/tasks';
 export const App = () => {
   const [hideCompleted, setHideCompleted] = useState(false);
 
-  const filter =
-    hideCompleted
-      ? {
-        $or: [
-          { isChecked: false },
-          { isChecked: undefined }
-        ]
-      } : {}
+  const notCheckedQuery = { isChecked: { $ne: true } }
+
+  const filter = {
+    ...hideCompleted && notCheckedQuery
+  }
 
   // use  { sort: { createdAt: -1 } } to get newest entries first
-  const tasks = useTracker(() => Tasks.find(filter, { sort: { createdAt: -1 } }).fetch());
+  const { tasks, incompleteTasksCount } = useTracker(() => ({
+    tasks: Tasks.find(filter, { sort: { createdAt: -1 } }).fetch(),
+    incompleteTasksCount: Tasks.find(notCheckedQuery).count()
+  }));
 
   const toggleChecked = ({ _id, isChecked }) => {
     Tasks.update(_id, {
@@ -31,7 +31,7 @@ export const App = () => {
 
   return (
     <div className="simple-todos-react">
-      <h1>Tasks!</h1>
+      <h1>Tasks! ({incompleteTasksCount} remain)</h1>
       <div className="filters">
         <label>
           <input
